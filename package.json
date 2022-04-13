@@ -1,0 +1,22 @@
+{
+  "name": "joe-schmoe",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/builders": "^0.12.0",
+    "@discordjs/rest": "^0.3.0",
+    "discord.js": "^13.6.0",
+    "fs": "^0.0.1-security",
+    "node-fetch": "^3.2.3",
+    "quickchart-js": "^3.0.1"
+  },
+  "devDependencies": {
+    "jest": "^27.5.1"
+  }
+}
