@@ -34,7 +34,7 @@ client.on('interactionCreate', async interaction => {
       case "enable-role-vote":
         if(!interaction.member.permissions.has("ADMINISTRATOR")){
           await interaction.reply({ content: "You must be an administrator to set up votes", ephemeral: true });
-          return
+          break;
         }
 
         options = {
@@ -50,7 +50,7 @@ client.on('interactionCreate', async interaction => {
         let errors = getErrors(options, "enable-role-vote");
         if (errors) {
           await interaction.reply({content: errors, ephemeral: true})
-          return;
+          break;
         };
 
         ROLE_VOTES[options.roleId] = {
@@ -69,7 +69,7 @@ client.on('interactionCreate', async interaction => {
       case "disable-role-vote":
         if(!interaction.member.permissions.has("ADMINISTRATOR")){
           await interaction.reply({ content: "You must be an administrator to manage votes", ephemeral: true });
-          return
+          break;
         }
 
         const role = interaction.options.getRole('role');
@@ -91,12 +91,12 @@ client.on('interactionCreate', async interaction => {
         if (options.type === "sphere") {
           if(!interaction.member.permissions.has("ADMINISTRATOR")){
             await interaction.reply({ content: "You must be an administrator to see sphere history", ephemeral: true });
-            return
+            break;
           }
         } else if (options.type === "role") {
           if (!interaction.member.roles.cache.has(roleId)) {
             await interaction.reply({ content: "You must have this role to see its history", ephemeral: true });
-            return
+            break;
           }
         }
 
