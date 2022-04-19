@@ -9,7 +9,7 @@ const getErrors = (options, command) => {
         errorMessage = "Please specify a day using one of these abbreviations: M, T, W, R, F, S, U";
       } else if (options["frequency"] === "monthly" && (!options["date"] || options["date"] > 28 || options["date"] < 1)) {
         errorMessage = "Please specify a day of the month between 1 and 28";
-      } else if (options["startTime"] === undefined || options["startTime"] > 1600 || options["startTime"] < 0) {
+      } else if (options["startTime"] === undefined || options["startTime"] > 2400 || options["startTime"] < 0) {
         errorMessage = "Please specify a start time between 0 and 2400 UTC";
       } else if (!options["periodLength"] || options["periodLength"] > 2440 || options["periodLength"] < 1) {
         errorMessage = "Please specify a voting period between 0 and 2440 minutes";
