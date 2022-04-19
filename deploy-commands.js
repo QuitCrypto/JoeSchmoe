@@ -1,4 +1,5 @@
 const fs = require('node:fs');
+require('dotenv').config();
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const { clientId, guildIds } = require('./db/joe-vars.json');
@@ -13,6 +14,10 @@ for (const file of commandFiles) {
 
 const rest = new REST({ version: '9' }).setToken(process.env.AVERAGE_BOT_TOKEN);
 
-rest.put(Routes.applicationCommands(clientId), { body: commands })
-	.then(() => console.log('Successfully registered application commands.'))
-	.catch(console.error);
+for (let i = 0; i < guildIds.length; i++) {
+	const guildId = guildIds[i];
+
+	rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commands })
+		.then(() => console.log('Successfully registered application commands.'))
+		.catch(console.error);
+}

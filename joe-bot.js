@@ -4,7 +4,8 @@ const fs = require('fs');
 require('dotenv').config();
 const getErrors = require('./utils/errors');
 const EmbedUtils = require("./utils/embed-utils");
-const JOE_VARS = require("./db/joe-vars.json")
+const JOE_VARS = JSON.parse(fs.readFileSync("./db/joe-vars.json"));
+const ROLE_VOTES = JSON.parse(fs.readFileSync("./db/role-votes.json"));
 
 const client = new Client({
                       intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS, Intents.FLAGS.DIRECT_MESSAGES, Intents.FLAGS.GUILD_MEMBERS],
@@ -31,7 +32,7 @@ client.on('interactionCreate', async interaction => {
   try {
     switch(interaction.commandName) {
       case "enable-role-vote":
-        if(!interaction.member.hasPermission("ADMINISTRATOR")){
+        if(!interaction.member.permissions.has("ADMINISTRATOR")){
           await interaction.reply({ content: "You must be an administrator to set up votes", ephemeral: true });
           return
         }
@@ -52,10 +53,34 @@ client.on('interactionCreate', async interaction => {
           return;
         };
 
+        ROLE_VOTES[options.roleId] = {
+          guildId: guild.id, 
+          options
+        }
+        fs.writeFileSync("db/role-votes.json", JSON.stringify(ROLE_VOTES));
+        deletePreviousFor(options.roleId);
+
+
         let rolePoll = new RolePoll(client, guild, options);
 
-        rolePoll.summarize();
+        rolePoll.initialize();
         await interaction.reply({content: "Your vote has been created", ephemeral: true} )
+        break;
+      case "disable-role-vote":
+        if(!interaction.member.permissions.has("ADMINISTRATOR")){
+          await interaction.reply({ content: "You must be an administrator to manage votes", ephemeral: true });
+          return
+        }
+
+        const role = interaction.options.getRole('role');
+
+        delete ROLE_VOTES[role.id];
+
+        fs.writeFileSync("db/role-votes.json", JSON.stringify(ROLE_VOTES));
+        deletePreviousFor(role.id);
+
+        await interaction.reply({ content: `Deleted vote for ${role}`, ephemeral: true });
+
         break;
       case "history":
         options = {
@@ -64,7 +89,7 @@ client.on('interactionCreate', async interaction => {
         }
 
         if (options.type === "sphere") {
-          if(!interaction.member.hasPermission("ADMINISTRATOR")){
+          if(!interaction.member.permissions.has("ADMINISTRATOR")){
             await interaction.reply({ content: "You must be an administrator to see sphere history", ephemeral: true });
             return
           }
@@ -90,6 +115,14 @@ client.on('interactionCreate', async interaction => {
     await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
   }
 });
+
+const deletePreviousFor = roleId => {
+  RolePoll.all().forEach(rollPoll => {
+    if (rollPoll.roleId === roleId) {
+      RolePoll.delete(rollPoll);
+    }
+  });
+}
 
 const getResults = async (guild, interaction, options) => {
   const allResults = JSON.parse(fs.readFileSync("./db/vote-results.json"));
@@ -122,6 +155,14 @@ client.on('ready', async () => {
   JOE_VARS["guildIds"] = guilds;
   fs.writeFileSync("./db/joe-vars.json", JSON.stringify(JOE_VARS))
 
+  for (let i = 0; i < Object.entries(ROLE_VOTES).length; i++) {
+    const [_roleId, params] = Object.entries(ROLE_VOTES)[i];
+
+    const guild = await client.guilds.fetch(params.guildId);
+
+    let rolePoll = new RolePoll(client, guild, params.options);
+    rolePoll.initialize(false);
+  }
   // for testing:
 
   // let guild = await client.guilds.fetch("876629005879631942");
@@ -139,7 +180,7 @@ client.on('ready', async () => {
   // }
 
   // let rolePoll = new RolePoll(client, guild, options);
-  // rolePoll.summarize();
+  // rolePoll.initialize();
 })
 
 client.on('messageReactionAdd', async (reaction, user) => {

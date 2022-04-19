@@ -4,7 +4,7 @@ const DAYS = [['Monday', 'M'], ['Tuesday', 'T'], ['Wednesday', 'W'], ['Thursday'
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('enable-role-vote')
-		.setDescription('Sets up a recurring vote for specified role.')
+		.setDescription('Sets up a recurring vote for specified role. This will overwrite any previous role votes')
     .addSubcommand(subcommand =>
       subcommand
         .setName('daily')
