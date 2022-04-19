@@ -31,6 +31,11 @@ client.on('interactionCreate', async interaction => {
   try {
     switch(interaction.commandName) {
       case "enable-role-vote":
+        if(!interaction.member.hasPermission("ADMINISTRATOR")){
+          await interaction.reply({ content: "You must be an administrator to set up votes", ephemeral: true });
+          return
+        }
+
         options = {
           roleId: interaction.options.getRole('role')?.id,
           channelId: interaction.options.getChannel('channel')?.id,
@@ -59,7 +64,7 @@ client.on('interactionCreate', async interaction => {
         }
 
         if (options.type === "sphere") {
-          if(!message.member.hasPermission("ADMINISTRATOR")){
+          if(!interaction.member.hasPermission("ADMINISTRATOR")){
             await interaction.reply({ content: "You must be an administrator to see sphere history", ephemeral: true });
             return
           }

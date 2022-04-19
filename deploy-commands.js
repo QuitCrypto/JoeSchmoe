@@ -13,10 +13,6 @@ for (const file of commandFiles) {
 
 const rest = new REST({ version: '9' }).setToken(process.env.AVERAGE_BOT_TOKEN);
 
-for (let i = 0; i < guildIds.length; i++) {
-	const guildId = guildIds[i];
-
-	rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commands })
-		.then(() => console.log('Successfully registered application commands.'))
-		.catch(console.error);
-}
+rest.put(Routes.applicationCommands(clientId), { body: commands })
+	.then(() => console.log('Successfully registered application commands.'))
+	.catch(console.error);
