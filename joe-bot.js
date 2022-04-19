@@ -1,32 +1,15 @@
-const { Client, Intents, Collection, Permissions, MessageEmbed } = require("discord.js");
+const { Client, Intents, Collection } = require("discord.js");
 const RolePoll = require('./lib/RolePoll');
-const Vote = require('./lib/Vote')
 const fs = require('fs');
 require('dotenv').config();
 const getErrors = require('./utils/errors');
-const QuickChart = require("quickchart-js");
+const EmbedUtils = require("./utils/embed-utils");
+const JOE_VARS = require("./db/joe-vars.json")
 
 const client = new Client({
                       intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS, Intents.FLAGS.DIRECT_MESSAGES, Intents.FLAGS.GUILD_MEMBERS],
                       partials: ['MESSAGE', 'REACTION', 'CHANNEL'],
                     });
-
-
-// const data = new SlashCommandBuilder()
-//   .setName('ping')
-//   .setDescription('Replies with Pong!')
-//   .addStringOption(option => option.setName('input').setDescription('Enter a string'))
-//   .addIntegerOption(option => option.setName('int').setDescription('Enter an integer'))
-//   .addNumberOption(option => option.setName('num').setDescription('Enter a number'))
-//   .addBooleanOption(option => option.setName('choice').setDescription('Select a boolean'))
-//   .addUserOption(option => option.setName('target').setDescription('Select a user'))
-//   .addChannelOption(option => option.setName('destination').setDescription('Select a channel'))
-//   .addRoleOption(option => option.setName('muted').setDescription('Select a role'))
-//   .addMentionableOption(option => option.setName('mentionable').setDescription('Mention something'));
-
-client.on('messageCreate', async message => {
-  
-})
 
 client.commands = new Collection();
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
@@ -39,7 +22,7 @@ for (const file of commandFiles) {
 client.on('interactionCreate', async interaction => {
 	if (!interaction.isCommand()) return;
 
-  let guild = await client.guilds.fetch("876629005879631942");
+  let guild = await client.guilds.fetch(interaction.guildId);
   let options;
 
 	const command = client.commands.get(interaction.commandName);
@@ -49,13 +32,13 @@ client.on('interactionCreate', async interaction => {
     switch(interaction.commandName) {
       case "enable-role-vote":
         options = {
-          "roleId": interaction.options.getRole('role')?.id,
-          "channelId": interaction.options.getChannel('channel')?.id,
-          "frequency": interaction.options.getSubcommand(),
-          "startTime": interaction.options.getInteger('start-time'),
-          "periodLength": interaction.options.getInteger('period-length'),
-          "day": interaction.options.getString('day'),
-          "date": interaction.options.getInteger('date')
+          roleId: interaction.options.getRole('role')?.id,
+          channelId: interaction.options.getChannel('channel')?.id,
+          frequency: interaction.options.getSubcommand(),
+          startTime: interaction.options.getInteger('start-time'),
+          periodLength: interaction.options.getInteger('period-length'),
+          day: interaction.options.getString('day'),
+          date: interaction.options.getInteger('date')
         }
 
         let errors = getErrors(options, "enable-role-vote");
@@ -71,15 +54,26 @@ client.on('interactionCreate', async interaction => {
         break;
       case "history":
         options = {
-          "type": interaction.options.getSubcommand(),
-          "roleId": interaction.options.getRole('role')?.id,
-          "user": interaction.options.getUser('user')?.id
+          type: interaction.options.getSubcommand(),
+          roleId: interaction.options.getRole('role')?.id,
         }
-        const embeds = await getResults(options, guild);
-        console.log(embeds);
+
+        if (options.type === "sphere") {
+          if(!message.member.hasPermission("ADMINISTRATOR")){
+            await interaction.reply({ content: "You must be an administrator to see sphere history", ephemeral: true });
+            return
+          }
+        } else if (options.type === "role") {
+          if (!interaction.member.roles.cache.has(roleId)) {
+            await interaction.reply({ content: "You must have this role to see its history", ephemeral: true });
+            return
+          }
+        }
+
+        const embeds = await getResults(guild, interaction, options);
 
         await interaction.reply({
-          content: "Fetching data", 
+          content: "Here's what I found:", 
           ephemeral: true, 
           embeds
         })
@@ -92,70 +86,25 @@ client.on('interactionCreate', async interaction => {
   }
 });
 
-const getResults = async (options, guild) => {
+const getResults = async (guild, interaction, options) => {
   const allResults = JSON.parse(fs.readFileSync("./db/vote-results.json"));
   const guildResults = allResults[guild.id];
-  const embeds = [];
+  let embeds;
 
   if (!guildResults) return;
 
-  switch(options["type"]) {
+  switch(options.type) {
     case "role":
-      break;
-    case "user":
-      break;
+      embeds = await EmbedUtils.createRoleEmbeds(guild, guildResults, options.roleId);
+      
+      return embeds;
+      case "user":
+      embeds = await EmbedUtils.createUserEmbeds(guild, guildResults, interaction.user.id);
+      
+      return embeds;
     case "sphere":
-      for (let k = 0; k < Object.entries(guildResults).length; k++) {
-        const [roleId, resultsHash] = Object.entries(guildResults)[k];
-
-        for (let i = 0; i < Object.entries(resultsHash).length; i++) {
-          const [date, voteResults] = Object.entries(resultsHash)[i];
-          let radarChart = new QuickChart()
-          let datasets = [];
-          let labels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-
-          for (let i = 0; i < Object.entries(voteResults).length; i++) {
-            const [userId, votesArray] = Object.entries(voteResults)[i];
-            const member = await guild.members.fetch(userId);
-            const username = member.user.username;
-            const counts = {};
-            votesArray.forEach(vote => counts[vote] = (counts[vote] || 0) + 1);
-            // datasets.push(username, String(Vote.getAverageVote(votesArray)), true);
-
-            datasets.push({ label: username, data: labels.map(score => counts[score] || 0) })
-          }
-
-          radarChart.setConfig({
-            type: 'radar',
-            data: {
-              labels,
-              datasets
-            },
-            options: {
-              scale: {
-                ticks: {
-                  min: 0,
-                  stepSize: 1
-                }
-              }
-            }
-          })
-
-          console.log(datasets);
-          const role = await guild.roles.fetch(roleId)
-          const embed = new MessageEmbed()
-          .setColor('#0099ff')
-          .setTitle(`${role.name} vote`)
-          .setDescription(`Vote from ${date}`)
-          .setThumbnail('https://i.imgur.com/AfFp7pu.png')
-          .addField('Inline field title', 'Some value here', true)
-          .setImage(radarChart.getUrl())
-          .setTimestamp()
-          .setFooter({ text: 'Some footer text here', iconURL: 'https://i.imgur.com/AfFp7pu.png' })
-
-          embeds.push(embed)
-        }
-      }
+      embeds = await EmbedUtils.createGuildEmbeds(guild, guildResults);
+      
       return embeds;
     default:
       break;
@@ -164,6 +113,12 @@ const getResults = async (options, guild) => {
 
 client.on('ready', async () => {
   console.log("Preparing the votes.");
+  let guilds = await (await client.guilds.fetch()).map(guild => guild.id);
+  JOE_VARS["guildIds"] = guilds;
+  fs.writeFileSync("./db/joe-vars.json", JSON.stringify(JOE_VARS))
+
+  // for testing:
+
   // let guild = await client.guilds.fetch("876629005879631942");
 
   // let addedZero = new Date().getUTCMinutes() > 9 ? "" : "0";

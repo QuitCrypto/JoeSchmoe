@@ -12,8 +12,7 @@ module.exports = {
     .addSubcommand(subcommand =>
       subcommand
         .setName('user')
-        .setDescription('Will retrieve votes for user specified')
-        .addUserOption(option => option.setName('user').setDescription('user to retrieve results for').setRequired(true))
+        .setDescription('Will retrieve votes for user that requested')
     )
     .addSubcommand(subcommand => 
       subcommand
