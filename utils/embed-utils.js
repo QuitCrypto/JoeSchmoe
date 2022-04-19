@@ -8,7 +8,7 @@ const createGuildEmbeds = async (guild, guildResults) => {
   for (let k = 0; k < Object.entries(guildResults).length; k++) {
     const [roleId, resultsHash] = Object.entries(guildResults)[k];
 
-    embeds = embeds.concat(await _getEmbedsFrom(resultsHash, roleId, guild))
+    embeds = embeds.concat(await getEmbedsFrom(resultsHash, roleId, guild))
     console.log(embeds);
   }
 
@@ -24,7 +24,7 @@ const createUserEmbeds = async (guild, guildResults, userId) => {
 
     if (!caller.roles.cache.has(roleId)) continue;
 
-    embeds = embeds.concat(await _getEmbedsFrom(resultsHash, roleId, guild))
+    embeds = embeds.concat(await getEmbedsFrom(resultsHash, roleId, guild))
   }
 
   return embeds
@@ -38,13 +38,13 @@ const createRoleEmbeds = async (guild, guildResults, roleIdToFetch) => {
 
     if (roleId !== roleIdToFetch) continue;
 
-    embeds = embeds.concat(await _getEmbedsFrom(resultsHash, roleId, guild))
+    embeds = embeds.concat(await getEmbedsFrom(resultsHash, roleId, guild))
   }
 
   return embeds
 }
 
-const _getEmbedsFrom = async (resultsHash, roleId, guild) => {
+const getEmbedsFrom = async (resultsHash, roleId, guild) => {
   const embeds = [];
 
   for (let i = 0; i < Object.entries(resultsHash).length; i++) {
@@ -99,5 +99,6 @@ const _getEmbedsFrom = async (resultsHash, roleId, guild) => {
 module.exports = {
   createGuildEmbeds,
   createUserEmbeds,
-  createRoleEmbeds
+  createRoleEmbeds,
+  getEmbedsFrom
 }
