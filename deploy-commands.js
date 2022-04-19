@@ -11,7 +11,7 @@ for (const file of commandFiles) {
 	commands.push(command.data.toJSON());
 }
 
-const rest = new REST({ version: '9' }).setToken(token);
+const rest = new REST({ version: '9' }).setToken(process.env.AVERAGE_BOT_TOKEN);
 
 for (let i = 0; i < guildIds.length; i++) {
 	const guildId = guildIds[i];
