@@ -94,7 +94,7 @@ client.on('interactionCreate', async interaction => {
             break;
           }
         } else if (options.type === "role") {
-          if (!interaction.member.roles.cache.has(roleId)) {
+          if (!interaction.member.roles.cache.has(options.roleId)) {
             await interaction.reply({ content: "You must have this role to see its history", ephemeral: true });
             break;
           }
@@ -136,7 +136,7 @@ const getResults = async (guild, interaction, options) => {
       embeds = await EmbedUtils.createRoleEmbeds(guild, guildResults, options.roleId);
       
       return embeds;
-      case "user":
+    case "user":
       embeds = await EmbedUtils.createUserEmbeds(guild, guildResults, interaction.user.id);
       
       return embeds;

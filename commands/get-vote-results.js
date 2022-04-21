@@ -7,12 +7,12 @@ module.exports = {
     .addSubcommand(subcommand =>
       subcommand
         .setName('sphere')
-        .setDescription('Will retrieve all votes')
+        .setDescription('Will retrieve all votes across all roles')
     )
     .addSubcommand(subcommand =>
       subcommand
-        .setName('user')
-        .setDescription('Will retrieve votes for user that requested')
+        .setName('self')
+        .setDescription('Will retrieve your vote history')
     )
     .addSubcommand(subcommand => 
       subcommand
