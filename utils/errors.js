@@ -20,8 +20,6 @@ const getErrors = (options, command) => {
       } else {
         return false;
       }
-    case "get-vote-results":
-
   }
 
   return errorMessage;

@@ -1,6 +1,6 @@
 const { Permissions } = require("discord.js");
 const fs = require('fs');
-
+const GUILD_VOTING_CATEGORY_IDS = JSON.parse(fs.readFileSync("./db/channel-category-mappings.json"));
 
 const createChannelFor = async (guild, member, client) => {
   const everyoneRole = guild.roles.everyone;
@@ -20,6 +20,7 @@ const createChannelFor = async (guild, member, client) => {
               allow: [Permissions.FLAGS.VIEW_CHANNEL]
           }
       ],
+      parent: GUILD_VOTING_CATEGORY_IDS[guild.id]
   });
 
   return channel;

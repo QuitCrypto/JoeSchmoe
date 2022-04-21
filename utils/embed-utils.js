@@ -74,6 +74,7 @@ const getEmbedsFrom = async (resultsHash, roleId, guild) => {
         scale: {
           ticks: {
             min: 0,
+            max: 10,
             stepSize: 1
           }
         }

@@ -6,6 +6,7 @@ const getErrors = require('./utils/errors');
 const EmbedUtils = require("./utils/embed-utils");
 const JOE_VARS = JSON.parse(fs.readFileSync("./db/joe-vars.json"));
 const ROLE_VOTES = JSON.parse(fs.readFileSync("./db/role-votes.json"));
+const GUILD_VOTING_CATEGORY_IDS = JSON.parse(fs.readFileSync("./db/channel-category-mappings.json"));
 
 const client = new Client({
                       intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS, Intents.FLAGS.DIRECT_MESSAGES, Intents.FLAGS.GUILD_MEMBERS],
@@ -74,6 +75,10 @@ client.on('interactionCreate', async interaction => {
 
         const role = interaction.options.getRole('role');
 
+        if (!ROLE_VOTES[role.id]) {
+          await interaction.reply({ content: `There were no votes set up for ${role}!`, ephemeral: true });
+          break;
+        }
         delete ROLE_VOTES[role.id];
 
         fs.writeFileSync("db/role-votes.json", JSON.stringify(ROLE_VOTES));
@@ -81,6 +86,50 @@ client.on('interactionCreate', async interaction => {
 
         await interaction.reply({ content: `Deleted vote for ${role}`, ephemeral: true });
 
+        break;
+      case "flash-vote":
+        if(!interaction.member.permissions.has("ADMINISTRATOR")){
+          await interaction.reply({ content: "You must be an administrator to set up votes", ephemeral: true });
+          break;
+        }
+
+        await interaction.reply({ content: "This is not implemented yet!", ephemeral: true })
+        // options = {
+        //   roleId: interaction.options.getRole('role')?.id,
+        //   channelId: interaction.options.getChannel('channel')?.id,
+        //   frequency: interaction.options.getSubcommand(),
+        //   startTime: interaction.options.getInteger('start-time'),
+        //   periodLength: interaction.options.getInteger('period-length'),
+        //   day: interaction.options.getString('day'),
+        //   date: interaction.options.getInteger('date')
+        // }
+        // let addedZero = new Date().getUTCMinutes() > 9 ? "" : "0";
+
+        // options = {
+        //   "roleId": "876641676695859300",
+        //   "channelId": "876635387395702814",
+        //   "frequency": "daily",
+        //   "startTime": parseFloat(`${new Date().getUTCHours()}${addedZero}${new Date().getUTCMinutes()}`) + 1,
+        //   "periodLength": 1,
+        //   "day": null,
+        //   "date": null,
+        // }
+      
+        // let rolePoll = new RolePoll(client, guild, options);
+        // rolePoll.initialize();
+
+        // ROLE_VOTES["flash-votes"] ||= [];
+        // ROLE_VOTES.push({
+        //   guildId: guild.id,
+        //   options
+        // })
+
+        // fs.writeFileSync("db/role-votes.json", JSON.stringify(ROLE_VOTES));
+
+        // let flashVote = new RolePoll(client, guild, options);
+
+        // flashVote.initialize();
+        // await interaction.reply({content: "Your vote has been created", ephemeral: true} )
         break;
       case "history":
         options = {
@@ -108,6 +157,23 @@ client.on('interactionCreate', async interaction => {
           embeds
         })
 
+        break;
+      case "set-voting-category":
+        const category = interaction.options.getChannel("category");
+
+        if (category.type !== "GUILD_CATEGORY") {
+          interaction.reply({ content: `${category} is not a category. Please try again.`, ephemeral: true });
+          break;
+        } else if (!interaction.member.permissions.has("ADMINISTRATOR")) {
+          await interaction.reply({ content: "You must be an administrator to set the voting channel category", ephemeral: true });
+          break;
+        }
+
+        GUILD_VOTING_CATEGORY_IDS[guild.id] = category.id;
+        fs.writeFileSync("db/channel-category-mappings.json", JSON.stringify(GUILD_VOTING_CATEGORY_IDS));
+        await interaction.reply({ content: `Voting category set to ${category}.  New votes will appear under this category.`, ephemeral: true });
+        break;
+      default:
         break;
     }
   } catch (error) {
@@ -164,7 +230,6 @@ client.on('ready', async () => {
     rolePoll.initialize(false);
   }
   // for testing:
-
   // let guild = await client.guilds.fetch("876629005879631942");
 
   // let addedZero = new Date().getUTCMinutes() > 9 ? "" : "0";
