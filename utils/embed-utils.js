@@ -9,7 +9,6 @@ const createGuildEmbeds = async (guild, guildResults) => {
     const [roleId, resultsHash] = Object.entries(guildResults)[k];
 
     embeds = embeds.concat(await getEmbedsFrom(resultsHash, roleId, guild))
-    console.log(embeds);
   }
 
   return embeds
