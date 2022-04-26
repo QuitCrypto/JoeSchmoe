@@ -30,7 +30,7 @@ client.on('interactionCreate', async interaction => {
 	const command = client.commands.get(interaction.commandName);
 	if (!command) return;
 
-  try {
+  // try {
     switch(interaction.commandName) {
       case "enable-role-vote":
         if(!interaction.member.permissions.has("ADMINISTRATOR")){
@@ -176,10 +176,10 @@ client.on('interactionCreate', async interaction => {
       default:
         break;
     }
-  } catch (error) {
-    console.error(error);
-    await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-  }
+  // } catch (error) {
+  //   console.error(error);
+  //   await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+  // }
 });
 
 const deletePreviousFor = roleId => {
@@ -202,7 +202,7 @@ const getResults = async (guild, interaction, options) => {
       embeds = await EmbedUtils.createRoleEmbeds(guild, guildResults, options.roleId);
       
       return embeds;
-    case "user":
+    case "self":
       embeds = await EmbedUtils.createUserEmbeds(guild, guildResults, interaction.user.id);
       
       return embeds;
@@ -230,22 +230,22 @@ client.on('ready', async () => {
     rolePoll.initialize(false);
   }
   // for testing:
-  // let guild = await client.guilds.fetch("876629005879631942");
+  let guild = await client.guilds.fetch("876629005879631942");
 
-  // let addedZero = new Date().getUTCMinutes() > 9 ? "" : "0";
+  let addedZero = new Date().getUTCMinutes() > 9 ? "" : "0";
 
-  // const options = {
-  //   "roleId": "876641676695859300",
-  //   "channelId": "876635387395702814",
-  //   "frequency": "daily",
-  //   "startTime": parseFloat(`${new Date().getUTCHours()}${addedZero}${new Date().getUTCMinutes()}`) + 1,
-  //   "periodLength": 1,
-  //   "day": null,
-  //   "date": null,
-  // }
+  const options = {
+    "roleId": "876641676695859300",
+    "channelId": "876635387395702814",
+    "frequency": "daily",
+    "startTime": parseFloat(`${new Date().getUTCHours()}${addedZero}${new Date().getUTCMinutes()}`) + 1,
+    "periodLength": 1,
+    "day": null,
+    "date": null,
+  }
 
-  // let rolePoll = new RolePoll(client, guild, options);
-  // rolePoll.initialize();
+  let rolePoll = new RolePoll(client, guild, options);
+  rolePoll.initialize();
 })
 
 client.on('messageReactionAdd', async (reaction, user) => {
