@@ -230,22 +230,22 @@ client.on('ready', async () => {
     rolePoll.initialize(false);
   }
   // for testing:
-  let guild = await client.guilds.fetch("876629005879631942");
+  // let guild = await client.guilds.fetch("876629005879631942");
 
-  let addedZero = new Date().getUTCMinutes() > 9 ? "" : "0";
+  // let addedZero = new Date().getUTCMinutes() > 9 ? "" : "0";
 
-  const options = {
-    "roleId": "876641676695859300",
-    "channelId": "876635387395702814",
-    "frequency": "daily",
-    "startTime": parseFloat(`${new Date().getUTCHours()}${addedZero}${new Date().getUTCMinutes()}`) + 1,
-    "periodLength": 1,
-    "day": null,
-    "date": null,
-  }
+  // const options = {
+  //   "roleId": "876641676695859300",
+  //   "channelId": "876635387395702814",
+  //   "frequency": "daily",
+  //   "startTime": parseFloat(`${new Date().getUTCHours()}${addedZero}${new Date().getUTCMinutes()}`) + 1,
+  //   "periodLength": 1,
+  //   "day": null,
+  //   "date": null,
+  // }
 
-  let rolePoll = new RolePoll(client, guild, options);
-  rolePoll.initialize();
+  // let rolePoll = new RolePoll(client, guild, options);
+  // rolePoll.initialize();
 })
 
 client.on('messageReactionAdd', async (reaction, user) => {
