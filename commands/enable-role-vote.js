@@ -11,7 +11,7 @@ module.exports = {
         .setDescription('Votes will happen daily')
         .addRoleOption(option => option.setName('role').setDescription('The role to vote on').setRequired(true))
         .addIntegerOption(option => option.setName('start-time').setDescription('0-2400 (in UTC)').setRequired(true))
-        .addIntegerOption(option => option.setName('period-length').setDescription('In minutes (Max 2440)').setRequired(true))
+        .addIntegerOption(option => option.setName('period-length').setDescription('In minutes (Max 1380)').setRequired(true))
         .addChannelOption(option => option.setName('channel').setDescription('Where the results will post').setRequired(true)))
     .addSubcommand(subcommand =>
       subcommand
