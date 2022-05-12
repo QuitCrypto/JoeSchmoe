@@ -242,7 +242,7 @@ client.on('ready', async () => {
   //   "channelId": "876635387395702814",
   //   "frequency": "daily",
   //   "startTime": parseFloat(`${new Date().getUTCHours()}${addedZero}${new Date().getUTCMinutes()}`) + 1,
-  //   "periodLength": 1,
+  //   "periodLength": 11,
   //   "day": null,
   //   "date": null,
   // }
