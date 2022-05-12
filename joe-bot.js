@@ -74,17 +74,20 @@ client.on('interactionCreate', async interaction => {
         }
 
         const role = interaction.options.getRole('role');
-
+        
         if (!ROLE_VOTES[role.id]) {
           await interaction.reply({ content: `There were no votes set up for ${role}!`, ephemeral: true });
           break;
         }
+
+        const channel = await guild.channels.fetch(ROLE_VOTES[role.id].channelId);
         delete ROLE_VOTES[role.id];
 
         fs.writeFileSync("db/role-votes.json", JSON.stringify(ROLE_VOTES));
         deletePreviousFor(role.id);
 
         await interaction.reply({ content: `Deleted vote for ${role}`, ephemeral: true });
+        channel.send(`A vote in this channel for ${role} was just deleted`)
 
         break;
       case "flash-vote":
