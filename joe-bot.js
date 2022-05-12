@@ -30,7 +30,7 @@ client.on('interactionCreate', async interaction => {
 	const command = client.commands.get(interaction.commandName);
 	if (!command) return;
 
-  // try {
+  try {
     switch(interaction.commandName) {
       case "enable-role-vote":
         if(!interaction.member.permissions.has("ADMINISTRATOR")){
@@ -176,10 +176,10 @@ client.on('interactionCreate', async interaction => {
       default:
         break;
     }
-  // } catch (error) {
-  //   console.error(error);
-  //   await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-  // }
+  } catch (error) {
+    console.error(error);
+    await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+  }
 });
 
 const deletePreviousFor = roleId => {
